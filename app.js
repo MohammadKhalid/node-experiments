@@ -1,7 +1,13 @@
 const Joi = require('joi');
+const logger = require('./logger');
+const auth = require('./auth');
 const express = require('express');
 const app = express();
+
+//middlewares
 app.use(express.json());
+app.use(logger);
+app.use(auth);
 
 const genres = [
     {id: 1, name: 'horror'},
