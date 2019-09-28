@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/courses', (req, res) => {
-    res.send([1, 2, 3]);
+    res.send(courses);
 });
 
 app.get('/api/posts/:year/:month', (req, res) => {
@@ -23,14 +23,8 @@ app.get('/api/posts/:year/:month', (req, res) => {
 });
 
 app.post('/api/courses', (req, res) => {
-    const schema = {
-        name: Joi.string().min(3).required()
-    };
-
-    const result = Joi.validate(req.body, schema);
-    console.log(result);
-    
-    if(result.error){
+    const { error } = validateCourse(req.body);
+    if(error){
         res.status(400).send(result.error.details[0].message);
         return;
     }
@@ -53,5 +47,45 @@ app.get('/api/courses/:id', (req, res) => {
     }
 });
 
+app.put('/api/courses/:id', (req, res) => {
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+    if(!course){
+        res.status(404).send('Course not found');
+        return;
+    }
+
+    const { error } = validateCourse(req.body);
+    if(error){
+        res.status(400).send(result.error.details[0].message);
+        return;
+    }
+
+    course.name = req.body.name;
+    res.send(course);
+    
+});
+
+app.delete('/api/courses/:id', (req, res) => {
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+    if(!course){
+        res.status(404).send('Course not found');
+        return;
+    }
+    //Delete
+    const index = courses.indexOf(course);
+    courses.splice(index, 1);
+
+    res.send(course);
+});
+
+
+function validateCourse(course){
+    const schema = {
+        name: Joi.string().min(3).required()
+    };
+
+    return Joi.validate(course, schema);
+};
+
 const port = process.env.PORT || 3000;
-app.listen(3000, () => console.log(`Listening on port ${port}...`));
+app.listen(port, () => console.log(`Listening on port ${port}...`));

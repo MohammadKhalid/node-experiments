@@ -1,17 +1,84 @@
-const http = require('http');
+const Joi = require('joi');
+const express = require('express');
+const app = express();
+app.use(express.json());
 
-const server = http.createServer((req, res) => {
-    if(req.url == '/'){
-        res.write('Hello World');
-        res.end();
-    }
+const genres = [
+    {id: 1, name: 'horror'},
+    {id: 2, name: 'action'},
+    {id: 3, name: 'romance'},
+];
 
-    if(req.url === '/api/courses'){
-        res.write(JSON.stringify([1, 2, 3]));
-        res.end();
-    }
+//base url
+app.get('/', (req, res) => {
+    res.send('Invalid url');
 });
 
-server.listen(3000);
+//Read all genres
+app.get('/api/genres', (req, res) => {
+    res.send(genres);
+});
 
-console.log('Listening on port 3000...');
+//Read genres by id
+app.get('/api/genres/:id', (req, res) => {
+    const genre = genres.find(item => item.id == parseInt(req.params.id));
+    //if not found then return
+    if (!genre) return res.status(404).send('Genre not found');
+
+    //else send course details
+    res.send(genre);
+});
+
+//Create new genres
+app.post('/api/genres', (req, res) => {
+    //validate genre existance and length
+    const { error } = genreValidation(req.body);
+    if (error) return res.status(400).send(result.error.details[0].message);
+
+    //if valid then
+    const genre = {
+        id: genres.length + 1,
+        name: req.body.name
+    };
+    genres.push(genre);
+    res.send(genre);
+});
+
+//Update existing genre
+app.put('/api/genres/:id', (req, res) => {
+    const genre = genres.find(item => item.id == parseInt(req.params.id));
+    //if not found then return
+    if (!genre) return res.status(404).send('Genre not found');
+
+    //else validate genre existance and length
+    const { error } = genreValidation(req.body);
+    if (error) return res.status(400).send(result.error.details[0].message);
+
+    //if valid then
+    genre.name = req.body.name;
+    res.send(genre);
+});
+
+//Delete genre
+app.delete('/api/genres/:id', (req, res) => {
+    const genre = genres.find(item => item.id == parseInt(req.params.id));
+    //if not found then return
+    if (!genre) return res.status(404).send('Genre not found');
+
+    //Delete
+    const index = genres.indexOf(genre);
+    genres.splice(index, 1);
+
+    res.send(genres);
+});
+
+function genreValidation(genre){
+    const schema = {
+        name: Joi.string().min(3).required()
+    };
+
+    return Joi.validate(genre);
+};
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Listening on port ${port}...`));
