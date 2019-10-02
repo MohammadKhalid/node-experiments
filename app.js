@@ -4,8 +4,11 @@ const auth = require('./auth');
 const express = require('express');
 const app = express();
 
-//middlewares
+// built-in middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended:true }));
+app.use(express.static('public'));
+
 app.use(logger);
 app.use(auth);
 
