@@ -1,3 +1,4 @@
+const debug = require('debug')('app:startup');
 const config = require('config');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -7,8 +8,11 @@ const auth = require('./auth');
 const express = require('express');
 const app = express();
 
-console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`app: ${app.get('env')}`);
+app.set('view engine', 'pug');
+app.set('views', './views');
+
+//console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+//console.log(`app: ${app.get('env')}`);
 
 // built-in middlewares
 app.use(express.json());
@@ -19,7 +23,7 @@ app.use(express.static('public'));
 app.use(helmet());
 if(app.get('env') == 'development'){
     app.use(morgan('tiny'));
-    console.log('Morgan enabled...'); 
+    debug('Morgan enabled...'); 
 }
 
 //custom middlewares
@@ -28,7 +32,7 @@ app.use(auth);
 
 console.log('Application Name:' + config.get('name'));
 console.log('Mail Server:' + config.get('mail.host'));
-console.log('Mail Password:' + config.get('mail.password'));
+//console.log('Mail Password:' + config.get('mail.password'));
 
 
 const courses = [
@@ -38,7 +42,7 @@ const courses = [
 ];
 
 app.get('/', (req, res) => {
-    res.send('Hello World!!!');
+    res.render('index', {title: 'My Express App', message:'Hello'});
 });
 
 app.get('/api/courses', (req, res) => {
