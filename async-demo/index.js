@@ -1,12 +1,15 @@
 console.log('Before');
-getUser(1, (user) => {
-    console.log('User', user);
-    //get repos
-    getRepositories(user.username, (repos) => {
-        console.log('User repos', repos);
-    });
-});
+getUser(1, printUsers);
 console.log('After');
+
+function printRepos(repos) {
+    console.log('User repos', repos);
+}
+
+function printUsers(user) {
+    console.log('User', user);
+    getRepositories(user.username, printRepos);
+}
 
 function getUser(id, callback) {
     setTimeout(() => {
